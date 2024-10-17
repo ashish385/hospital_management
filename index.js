@@ -2,7 +2,9 @@
 const express = require("express");
 const database = require("./config/database")
 const dotenv = require("dotenv");
+const cookieParser = require("cookie-parser");
 const doctorRoutes = require("./routes/doctorRoutes");
+const authRoutes = require("./routes/authRoutes")
 
 dotenv.config();
 database.connect();
@@ -12,8 +14,10 @@ const port = process.env.PORT || 8800;
 
 
 app.use(express.json()); 
+app.use(cookieParser());
 
 // Routes
+app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/doctor", doctorRoutes);
 
 // def routes
