@@ -6,6 +6,6 @@ const {auth, isDoctor   } = require("../middlewares/authMiddleware");
 // Routes add a doctor
 router.post("/createDoctor", createDoctor);
 router.get("/getAllDoctors", auth, getAllDoctors);
-router.put("/updateDoctor", auth,isDoctor, updateDoctor);
+router.put("/updateDoctor", auth, isDoctor, updateDoctor);
 
 module.exports = router;

@@ -83,7 +83,7 @@ exports.createDoctor = async (req, res) => {
       token,
     });
   } catch (error) {
-    res.status(500).json({ message: "Error creating user", error });
+    res.status(500).json({ message: "Error creating doctor", error });
   }
 };
 
@@ -208,6 +208,6 @@ exports.updateDoctorByAdmin = async (req, res) => {
       data:doctorProfile
     });
   } catch (error) {
-    res.status(500).json({ message: "Error creating user", error });
+    res.status(500).json({ message: "Error updating  doctor profile", error });
   }
 };

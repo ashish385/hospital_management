@@ -3,10 +3,21 @@ const mongoose = require("mongoose");
 const User = require("./user");
 
 const doctorSchema = new mongoose.Schema({
-  contactNumber: {
-    type: String,
+  dateOfBirth: {
+    type: Date,
     required: true,
-    unique: true,
+  },
+  gender: {
+    type: String,
+    enum: ["Male", "Female", "Other"],
+    required: true,
+  },
+  address: {
+    street: String,
+    city: String,
+    state: String,
+    postalCode: String,
+    country: String,
   },
   speciality: {
     type: String,
