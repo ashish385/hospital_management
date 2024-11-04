@@ -22,6 +22,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/doctor", doctorRoutes);
 app.use("/api/v1/patient",patientRoutes );
 app.use("/api/v1/service",require("./routes/serviceRoutes") );
+app.use("/api/v1/Procedure", require("./routes/procedureRoutes"));
 
 // def routes
 app.get("/", (req, res) => {
@@ -30,7 +31,6 @@ app.get("/", (req, res) => {
         message: "Your server is up and running...."
     })
 });
-
 
 // Start server
 app.listen(port, () => {

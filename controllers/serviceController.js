@@ -78,6 +78,7 @@ exports.updateService = async (req, res)=> {
             
 }
 
+
 exports.getActiveServices = async (req, res) => {
   try {
     const activeServices = await Service.find({ isActive: true });
@@ -98,3 +99,22 @@ exports.getActiveServices = async (req, res) => {
   }
 };
 
+exports.getDeactiveServices = async (req, res) => {
+  try {
+    const deactiveServices = await Service.find({ isActive: false });
+
+    if (deactiveServices.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "No active services found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: deactiveServices,
+    });
+  } catch (error) {
+    console.error("Error getting active services:", error);
+    res.status(500).json({ message: "Error getting active services", error });
+  }
+};

@@ -12,7 +12,7 @@ const patientSchema = new mongoose.Schema({
   patientUHID: {
     type: String,
     required: true,
-    unique: true, 
+    unique: true,
   },
   dateOfBirth: {
     type: Date,
@@ -38,6 +38,7 @@ const patientSchema = new mongoose.Schema({
     },
   ],
   allergies: [String],
+  createdAt: { type: Date, default: Date.now },
 });
 
 
