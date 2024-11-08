@@ -35,17 +35,7 @@ exports.uploadImageToR2 = async (file) => {
     const response = await s3.send(new PutObjectCommand(uploadParams));
   console.log("Image uploaded:", response);
   
-  const imageUrl = `https://${ACCOUNT_ID}.r2.cloudflarestorage.com/${BUCKET_NAME}/${imageKey}`;
+  const imageUrl =  `https://${ACCOUNT_ID}.r2.cloudflarestorage.com/${BUCKET_NAME}/${imageKey}`;
   console.log("Image URL:", imageUrl);
   return imageUrl;
-    // return response;
-    // res
-    //   .status(200)
-    //   .send({ message: "Image uploaded successfully", data: response });
-  // } catch (error) {
-  //   console.error("Error uploading image:", error.message);
-  // //   res
-  // //     .status(500)
-  // //     .send({ message: "Error uploading image", error: error.message });
-  // }
 }

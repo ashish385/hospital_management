@@ -12,7 +12,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       default:
         "https://img.freepik.com/premium-vector/doctor-surgeon-pharmacist-therapist-with-stethoscope-smiling-medic-worker-medical-staff_458444-338.jpg",
-      // required: true,
     },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },

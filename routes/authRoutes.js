@@ -8,7 +8,7 @@ const { updateDoctorByAdmin } = require("../controllers/doctorController");
 router.post("/", registerUser);
 router.post("/login", userLogin);
 router.put("/updateDoctorProfile/:id",auth,isAdmin,updateDoctorByAdmin)
-router.put("/updateUserProfileImage/:id", auth, isAdmin, updateProfileImage);
+router.put("/updateUserProfileImage/:id", auth, updateProfileImage);
 
 
 module.exports = router;

@@ -1,79 +1,76 @@
 const User = require("../models/user");
 const { uploadImageToR2 } = require("../utils/fileUploader");
 const { validateFields } = require("../utils/validateFields");
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-
 // Register user
- exports.registerUser =  async (req, res) => {
+exports.registerUser = async (req, res) => {
+  const { fullName, email, password, accountType } = req.body;
+  console.log(req.body);
 
-   const { fullName, email, password, accountType } = req.body;
-   console.log(req.body);
-   
+  const requiredFields = { fullName, email, accountType };
 
-   const requiredFields = { fullName, email, accountType };
-  
-   try {
-     // Use the validateFields function to get missing fields
-     const missingFields = validateFields(requiredFields);
-     // Check if there are any missing fields
-     if (missingFields.length > 0) {
-       return res.status(400).json({
-         message: `The following fields are required: ${missingFields.join(
-           ", "
-         )}`,
-       });
-     }
+  try {
+    // Use the validateFields function to get missing fields
+    const missingFields = validateFields(requiredFields);
+    // Check if there are any missing fields
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        message: `The following fields are required: ${missingFields.join(
+          ", "
+        )}`,
+      });
+    }
 
-     // Check if user already exists
-     let existingUser = await User.findOne({ email });
-     console.log("existingUser", existingUser);
-     
+    // Check if user already exists
+    let existingUser = await User.findOne({ email });
+    console.log("existingUser", existingUser);
 
-     if (existingUser)
-       return res.status(400).json({ message: "User already exists" });
-     if (accountType !== "admin")
-       return res.status(400).json({ message: "Invalid account type!" });
-     console.log("accountType", accountType);
-     // Create a new user
-     const newUser = new User({ fullName, email, password, accountType });
-     await newUser.save();
+    if (existingUser)
+      return res.status(400).json({ message: "User already exists" });
+    if (accountType !== "admin")
+      return res.status(400).json({ message: "Invalid account type!" });
+    console.log("accountType", accountType);
+    // Create a new user
+    const newUser = new User({ fullName, email, password, accountType });
+    await newUser.save();
 
-     const userData = {
-       fullName: newUser.fullName,
-       email: newUser.email,
-       accountType:newUser.accountType
-     }
+    const userData = {
+      fullName: newUser.fullName,
+      email: newUser.email,
+      accountType: newUser.accountType,
+    };
 
-     // Return a success message
-     res.status(200).json({
-       success: true,
-       message: "User added successfully!",
-       data:userData
-     })
-   } catch (error) {
+    // Return a success message
+    res.status(200).json({
+      success: true,
+      message: "User added successfully!",
+      data: userData,
+    });
+  } catch (error) {
     res.status(500).json({ message: "Error creating user", error });
-   }
+  }
 };
- 
+
 // Login user
 exports.userLogin = async (req, res) => {
   const { email, password } = req.body;
 
-  if(!email || !password) return res.status(400).json({
-    message: `All fields are required!`,
-  });
+  if (!email || !password)
+    return res.status(400).json({
+      message: `All fields are required!`,
+    });
   try {
     const user = await User.findOne({ email });
     console.log(user);
     if (!user) return res.status(400).json({ message: "User not found" });
 
-    const correctPassword = await user.matchPassword(password);  
+    const correctPassword = await user.matchPassword(password);
     if (!correctPassword) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
-  
+
     // Return JWT token
     const token = jwt.sign(
       { id: user._id, accountType: user.accountType },
@@ -83,69 +80,71 @@ exports.userLogin = async (req, res) => {
 
     const data = {
       token: token,
+      name:user.fullName,
       email: user.email,
-      accountType:user.accountType
-    }
-    res.status(200).json({ 
+      profileImage:user.image,
+      accountType: user.accountType,
+    };
+    res.status(200).json({
       success: true,
-      data:data
-     });
+      data: data,
+    });
   } catch (error) {
     res.status(500).json({ message: "Error logging in", error });
   }
 };
 
 // Forgot password
-exports.forgotPassword = async(req,res)=>{
+exports.forgotPassword = async (req, res) => {
   const { id } = req.user;
-  const {  newPassword } = req.body;
+  const { newPassword } = req.body;
 
-  if (!newPassword) return res.status(400).json({
-    success: false,
-    message:"New password required"
-  })
+  if (!newPassword)
+    return res.status(400).json({
+      success: false,
+      message: "New password required",
+    });
   try {
     const user = await User.findById(id);
-    if (!user) return res.status(400).json({ success: false, message: "User not found" })
+    if (!user)
+      return res
+        .status(400)
+        .json({ success: false, message: "User not found" });
     user.password = newPassword;
     await user.save();
-    res.status(200).json({ success: true, message: "Password updated successfully" });
-    
+    res
+      .status(200)
+      .json({ success: true, message: "Password updated successfully" });
   } catch (error) {
-     res.status(500).json({ message: "Error creating new password", error });
+    res.status(500).json({ message: "Error creating new password", error });
   }
-}
+};
 
 // Update User Profile Image
 exports.updateProfileImage = async (req, res) => {
   const { id } = req.user;
   const { image } = req.files;
-  console.log("image", image);
-  
+  // console.log("image", image);
   try {
-    
     const user = await User.findById(id);
 
     if (!user) return res.status(401).send("user not found");
 
-    console.log("befor file upload");
-    
-    const response = await uploadImageToR2(image);
-    console.log("after file upload");
-    console.log(response);
-    
+    // console.log("befor file upload");
 
-     console.log("After file upload");
+    const imageUrl = await uploadImageToR2(image);
+
+   const updateProfile = await User.findByIdAndUpdate({ _id: id }, { image: imageUrl }, { new: true });
+
     return res.status(200).json({
-      response
-    })
+      success: true,
+      message: "Image uploaded successfully",
+      data: updateProfile.image,
+    });
   } catch (error) {
-    console.log(error);
-    
+    console.log("error",error); 
+    res
+      .status(500)
+      .send({ message: "Error uploading image", error: error.message });
   }
-
-}
-
-
-
-
+};
