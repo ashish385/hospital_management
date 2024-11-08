@@ -1,4 +1,5 @@
 const User = require("../models/user");
+const { uploadImageToR2 } = require("../utils/fileUploader");
 const { validateFields } = require("../utils/validateFields");
 const jwt = require("jsonwebtoken")
 require("dotenv").config();
@@ -44,6 +45,7 @@ require("dotenv").config();
        email: newUser.email,
        accountType:newUser.accountType
      }
+
      // Return a success message
      res.status(200).json({
        success: true,
@@ -113,4 +115,37 @@ exports.forgotPassword = async(req,res)=>{
      res.status(500).json({ message: "Error creating new password", error });
   }
 }
+
+// Update User Profile Image
+exports.updateProfileImage = async (req, res) => {
+  const { id } = req.user;
+  const { image } = req.files;
+  console.log("image", image);
+  
+  try {
+    
+    const user = await User.findById(id);
+
+    if (!user) return res.status(401).send("user not found");
+
+    console.log("befor file upload");
+    
+    const response = await uploadImageToR2(image);
+    console.log("after file upload");
+    console.log(response);
+    
+
+     console.log("After file upload");
+    return res.status(200).json({
+      response
+    })
+  } catch (error) {
+    console.log(error);
+    
+  }
+
+}
+
+
+
 

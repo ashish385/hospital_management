@@ -2,18 +2,17 @@ const { Patient, Counter } = require("../models/patient");
 const User = require("../models/user");
 const { validateFields } = require("../utils/validateFields");
 
-exports.createPatient = async (req, res) => {
+exports.generateUHID = async (req, res) => {
   const { fullName, email, age, gender, contactNumber, address } = req.body;
 
   const requiredFields = {
     fullName,
     email,
-    phone,
+    contactNumber,
     password: contactNumber,
     accountType: "patient",
     age,
     gender,
-    contactNumber,
     address,
   };
 
@@ -43,6 +42,7 @@ exports.createPatient = async (req, res) => {
     const userData = {
       fullName: newPatient.fullName,
       email: newPatient.email,
+      contactNumber:newPatient.contactNumber,
       accountType: newPatient.accountType,
       patientUHID: newPatient.patientUHID,
     };

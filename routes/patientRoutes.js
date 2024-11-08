@@ -1,10 +1,10 @@
 const express = require("express");
 const { auth, isAdmin } = require("../middlewares/authMiddleware");
-const { createPatient, getPatientByUHID, getAllPatient } = require("../controllers/patientController");
+const { getPatientByUHID, getAllPatient, generateUHID } = require("../controllers/patientController");
 const router = express.Router();
 
 
-router.post("/createPatient", auth, isAdmin, createPatient);
+router.post("/generateUHID", auth, isAdmin, generateUHID);
 router.get("/getAllPatient", auth, getAllPatient);
 router.get("/getPatientByUHID/:patientUHID", auth, getPatientByUHID);
 

@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const doctorRoutes = require("./routes/doctorRoutes");
 const authRoutes = require("./routes/authRoutes");
 const patientRoutes = require("./routes/patientRoutes");
+const fileUpload = require("express-fileupload");
 
 dotenv.config();
 database.connect();
@@ -16,6 +17,12 @@ const port = process.env.PORT || 8800;
 
 app.use(express.json()); 
 app.use(cookieParser());
+app.use(
+  fileUpload({
+    useTempFiles: true,
+    tempFileDir: "/temp/",
+  })
+);
 
 // Routes
 app.use("/api/v1/auth", authRoutes);
