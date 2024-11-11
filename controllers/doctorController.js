@@ -1,4 +1,3 @@
-
 const jwt = require("jsonwebtoken");
 const { validateFields } = require("../utils/validateFields");
 const User = require("../models/user");
@@ -14,12 +13,6 @@ exports.createDoctor = async (req, res) => {
     accountType,
     speciality,
     degree,
-    opConsultationFee,
-    consultationDays,
-    feeConsultationVisits,
-    ipVisitFee,
-    casualtyFee,
-    icuFee,
     experience,
     generalFee,
     about,
@@ -30,21 +23,14 @@ exports.createDoctor = async (req, res) => {
     email,
     password: contactNumber,
     contactNumber,
-    accountType,
+    accountType:"doctor",
     speciality,
     degree,
-    opConsultationFee,
-    consultationDays,
-    feeConsultationVisits,
-    ipVisitFee,
-    casualtyFee,
-    icuFee,
     experience,
     generalFee,
     about,
   };
 
-  // Use the validateFields function to get missing fields
   const missingFields = validateFields(requiredFields);
   // Check if there are any missing fields
   if (missingFields.length > 0) {
@@ -58,16 +44,8 @@ exports.createDoctor = async (req, res) => {
     if (existingUser)
       return res.status(400).json({ message: "User already exists" });
 
-    // Create specific user by accountType
-    let newUser;
-    switch (accountType) {
-      case "doctor":
-        newUser = new Doctor(requiredFields);
-        break;
-      default:
-        return res.status(400).json({ message: "Invalid account type" });
-    }
-    //  JWT_SECRET;
+    // Create specific user by accountType\
+    let newUser = new Doctor(requiredFields);
     await newUser.save();
     console.log("newuser", newUser);
 
@@ -100,33 +78,28 @@ exports.getAllDoctors = async (req, res) => {
 };
 
 exports.updateDoctor = async (req, res) => {
-  const {
-    fullName,
-    contactNumber,
-  } = req.body;
-  
+  const { fullName, contactNumber } = req.body;
+
   const { id, accountType } = req.user;
-  
 
   try {
-   
     let userProfile = await Doctor.findById(id).select("-password");
     // console.log("user profile",userProfile);
-    
+
     if (!userProfile)
       return res.status(400).json({ message: "User not exists" });
-    
+
     if (accountType !== "doctor")
       return res.status(400).json({ message: "Invalid account type" });
 
     userProfile.contactNumber = contactNumber;
     userProfile.fullName = fullName;
-    
+
     await userProfile.save();
 
     res.status(201).json({
       success: true,
-      message:"doctor profile update successfully!"
+      message: "doctor profile update successfully!",
     });
   } catch (error) {
     res.status(500).json({ message: "Error creating user", error });
@@ -152,35 +125,31 @@ exports.updateDoctorByAdmin = async (req, res) => {
 
   const doctorId = req.params.id;
 
-   const requiredFields = {
-     fullName,
-     contactNumber,
-     speciality,
-     degree,
-     opConsultationFee,
-     consultationDays,
-     feeConsultationVisits,
-     ipVisitFee,
-     casualtyFee,
-     icuFee,
-     experience,
-     generalFee,
-     about,
-   };
+  const requiredFields = {
+    fullName,
+    contactNumber,
+    speciality,
+    degree,
+    opConsultationFee,
+    consultationDays,
+    feeConsultationVisits,
+    ipVisitFee,
+    casualtyFee,
+    icuFee,
+    experience,
+    generalFee,
+    about,
+  };
 
-   const missingFields = validateFields(requiredFields);
+  const missingFields = validateFields(requiredFields);
 
-   if (missingFields.length > 0) {
-     return res.status(400).json({
-       message: `The following fields are required: ${missingFields.join(
-         ", "
-       )}`,
-     });
-   }
-
+  if (missingFields.length > 0) {
+    return res.status(400).json({
+      message: `The following fields are required: ${missingFields.join(", ")}`,
+    });
+  }
 
   try {
-  
     let doctorProfile = await Doctor.findById(doctorId).select("-password");
 
     if (!doctorProfile)
@@ -205,7 +174,7 @@ exports.updateDoctorByAdmin = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Doctor profile update successfully!",
-      data:doctorProfile
+      data: doctorProfile,
     });
   } catch (error) {
     res.status(500).json({ message: "Error updating  doctor profile", error });

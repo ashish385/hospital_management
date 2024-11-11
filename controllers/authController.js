@@ -80,9 +80,9 @@ exports.userLogin = async (req, res) => {
 
     const data = {
       token: token,
-      name:user.fullName,
+      name: user.fullName,
       email: user.email,
-      profileImage:user.image,
+      profileImage: user.image,
       accountType: user.accountType,
     };
     res.status(200).json({
@@ -134,7 +134,11 @@ exports.updateProfileImage = async (req, res) => {
 
     const imageUrl = await uploadImageToR2(image);
 
-   const updateProfile = await User.findByIdAndUpdate({ _id: id }, { image: imageUrl }, { new: true });
+    const updateProfile = await User.findByIdAndUpdate(
+      { _id: id },
+      { image: imageUrl },
+      { new: true }
+    );
 
     return res.status(200).json({
       success: true,
@@ -142,7 +146,7 @@ exports.updateProfileImage = async (req, res) => {
       data: updateProfile.image,
     });
   } catch (error) {
-    console.log("error",error); 
+    console.log("error", error);
     res
       .status(500)
       .send({ message: "Error uploading image", error: error.message });

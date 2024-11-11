@@ -1,5 +1,4 @@
 const { Patient, Counter } = require("../models/patient");
-const User = require("../models/user");
 const { validateFields } = require("../utils/validateFields");
 
 exports.generateUHID = async (req, res) => {
@@ -72,7 +71,13 @@ exports.getAllPatient = async (req, res) => {
       message: "Patient found",
       data: patientList,
     });
-  } catch (error) {}
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error to fetch all patient",
+      error
+    });
+  }
 };
 
 exports.getPatientByUHID = async (req, res) => {
@@ -89,5 +94,11 @@ exports.getPatientByUHID = async (req, res) => {
       message: "Patient found",
       data: patient,
     });
-  } catch (error) {}
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error Can't find patient by UHID",
+      error
+    });
+  }
 };

@@ -1,5 +1,6 @@
 // utils/validateFields.js
 
+
 const { Counter } = require("../models/patient");
 
 /**
@@ -21,6 +22,21 @@ exports.validateFields = (fields) => {
   const paddedNumber = result.sequence.toString().padStart(6, "0");
   return `M-${paddedNumber}`; 
 }
+
+// Generate Random Image Name
+exports.generateImageName = async() => {
+  // Define the prefix for the image name
+  const prefix = "Imgrnd";
+
+  // Generate a random number (for example, 5 digits)
+  const randomNumber =  Math.floor(Math.random() * 100000); 
+
+  // Combine the prefix with the random number
+  const imageName = `${prefix}${randomNumber}`;
+
+  return imageName;
+}
+
 
 
 

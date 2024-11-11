@@ -5,12 +5,12 @@ const User = require("./user");
 const doctorSchema = new mongoose.Schema({
   dateOfBirth: {
     type: Date,
-    required: true,
+    // required: true,
   },
   gender: {
     type: String,
     enum: ["Male", "Female", "Other"],
-    required: true,
+    // required: true,
   },
   address: {
     street: String,
@@ -29,11 +29,11 @@ const doctorSchema = new mongoose.Schema({
   },
   opConsultationFee: {
     type: Number,
-    required: true,
+    // required: true,
   },
   consultationDays: {
     type: String, // may be string array
-    required: true,
+    // required: true,
   },
   feeConsultationVisits: {
     type: Number,

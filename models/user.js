@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema(
     },
   },
   {
-    discriminatorKey: "accountType", // Key for discriminators
+    discriminatorKey: "accountType", 
     timestamps: true,
   }
 );
