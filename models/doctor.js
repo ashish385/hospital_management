@@ -3,15 +3,6 @@ const mongoose = require("mongoose");
 const User = require("./user");
 
 const doctorSchema = new mongoose.Schema({
-  dateOfBirth: {
-    type: Date,
-    // required: true,
-  },
-  gender: {
-    type: String,
-    enum: ["Male", "Female", "Other"],
-    // required: true,
-  },
   address: {
     street: String,
     city: String,

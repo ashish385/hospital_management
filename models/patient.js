@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const User = require("./user");
+require("dotenv").config();
 
 const counterSchema = new mongoose.Schema({
   _id: { type: String, required: true },
@@ -14,16 +15,9 @@ const patientSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  dateOfBirth: {
-    type: Date,
-  },
+  
   age: {
     type: Number,
-    required: true,
-  },
-  gender: {
-    type: String,
-    enum: ["Male", "Female", "Other"],
     required: true,
   },
   address: {
@@ -52,7 +46,7 @@ patientSchema.pre("save", async function (next) {
     );
 
     const paddedNumber = result.sequence.toString().padStart(6, "0");
-    this.patientUHID = `M-${paddedNumber}`;
+    this.patientUHID = `${process.env.UHID_PREFIX}-${paddedNumber}`;
     console.log(`Generated patientUHID: ${this.patientUHID}`); 
     next();
   } catch (error) {

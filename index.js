@@ -29,7 +29,8 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/doctor", doctorRoutes);
 app.use("/api/v1/patient",patientRoutes );
 app.use("/api/v1/service",require("./routes/serviceRoutes") );
-app.use("/api/v1/Procedure", require("./routes/procedureRoutes"));
+app.use("/api/v1/procedure", require("./routes/procedureRoutes"));
+app.use("/api/v1/opd", require("./routes/opdRoutes"));
 
 // def routes
 app.get("/", (req, res) => {
@@ -39,7 +40,12 @@ app.get("/", (req, res) => {
     })
 });
 
-// Start server
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+if (process.env.NODE_ENV === "production") {
+  console.log("Running in production mode");
+} else {
+  console.log("Running in development mode");
+}
+  // Start server
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });

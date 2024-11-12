@@ -37,6 +37,15 @@ exports.generateImageName = async() => {
   return imageName;
 }
 
+// Function for Response helper
+exports.responseHelper = (res, statusCode, message, data = null) => {
+  res.status(statusCode).json({
+    success: statusCode >= 200 && statusCode < 300, 
+    message: message,
+    data: data,
+  });
+};
+
 
 
 

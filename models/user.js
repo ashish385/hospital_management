@@ -19,7 +19,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-
+    gender: {
+      type: String,
+      enum: ["Male", "Female", "Other"],
+      required: true,
+    },
+    dateOfBirth: {
+      type: Date,
+    },
     accountType: {
       type: String,
       enum: ["admin", "doctor", "patient", "nurse"],
@@ -35,7 +42,7 @@ const userSchema = new mongoose.Schema(
     },
   },
   {
-    discriminatorKey: "accountType", 
+    discriminatorKey: "accountType",
     timestamps: true,
   }
 );

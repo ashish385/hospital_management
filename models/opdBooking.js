@@ -1,3 +1,4 @@
+// opdBooking.js
 const mongoose = require("mongoose");
 
 const opdBookingSchema = new mongoose.Schema({
@@ -8,11 +9,16 @@ const opdBookingSchema = new mongoose.Schema({
   gender: { type: String, required: true },
   address: { type: String, required: true },
   doctorSpeciality: { type: String, required: true },
-  fees: { type: Number },
-  discount: { type: Number },
+  fee: { type: Number,default:0 },
+  discount: { type: Number, default:0 },
+  // feeAfterDiscount:{type:Number},
   paymentMode: { type: String, required: true },
   remark: { type: String },
-  createdAt: { type: Date, default: Date.now },
-});
+  status: { type: String, default: "pending" }, 
+},
+  {
+    timestamps: true,
+  }
+);
 
 module.exports = mongoose.model("OPDBooking", opdBookingSchema);
