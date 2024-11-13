@@ -3,6 +3,7 @@
 
 const { Counter } = require("../models/patient");
 
+
 /**
  * Validate required fields in the request body.
  * @param {object} fields - An object of the fields to be validated.
@@ -45,6 +46,25 @@ exports.responseHelper = (res, statusCode, message, data = null) => {
     data: data,
   });
 };
+
+// Function Parse To Float
+exports.parseToFloat = (value) => {
+  return parseFloat(
+    value
+      .toString()
+      .trim()
+      .replace(/[^0-9.-]+/g, "")
+  );
+}
+
+// Function to return error message if respone empty
+exports.returnErrorMessage = (respone,res,statusCode,message,data=null) => {
+  if (!respone || respone.length === 0) {
+    console.log("No unvisited bookings to extend to the next day");
+    return this.responseHelper(res, statusCode, message,data);
+  }
+}
+
 
 
 

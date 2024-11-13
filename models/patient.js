@@ -1,13 +1,8 @@
 const mongoose = require("mongoose");
 const User = require("./user");
+const Counter = require("./counter");
 require("dotenv").config();
 
-const counterSchema = new mongoose.Schema({
-  _id: { type: String, required: true },
-  sequence: { type: Number, default: 0 },
-});
-
-const Counter = mongoose.model("Counter", counterSchema);
 
 const patientSchema = new mongoose.Schema({
   patientUHID: {
@@ -15,7 +10,6 @@ const patientSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  
   age: {
     type: Number,
     required: true,
@@ -61,5 +55,4 @@ const Patient = User.discriminator("patient", patientSchema);
 
 module.exports = {
   Patient,
-  Counter,
 };

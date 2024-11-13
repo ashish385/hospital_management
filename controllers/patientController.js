@@ -1,4 +1,5 @@
-const { Patient, Counter } = require("../models/patient");
+const { Patient } = require("../models/patient");
+const Counter = require("../models/counter");
 const { validateFields } = require("../utils/validateFields");
 
 exports.generateUHID = async (req, res) => {
