@@ -1,31 +1,25 @@
 const OPDBooking = require("../models/opdBooking");
+const { Patient } = require("../models/patient");
+const Doctor = require("../models/doctor")
 const { responseHelper, parseToFloat, returnErrorMessage } = require("../utils/validateFields");
 
 exports.saveOPDBooking = async (req, res) => {
   try {
     const {
       patientUHID,
-      patientName,
-      phone,
-      age,
-      gender,
-      address,
-      doctorSpeciality,
+      doctorId,
       fee,
       discount,
       paymentMode,
       remark,
     } = req.body;
 
- 
     let sanitizeFee = parseToFloat(fee);
     let sanitizeDiscount = parseToFloat(discount);
 
-
     if (sanitizeDiscount > 100) {
-      return responseHelper(res, 4001, "Discount cannot be more than 100");
+      return responseHelper(res, 401, "Discount cannot be more than 100");
     }
-
 
     const discountFee = sanitizeFee - (sanitizeFee * sanitizeDiscount) / 100;
 
@@ -37,20 +31,32 @@ exports.saveOPDBooking = async (req, res) => {
     });
     let newToken = lastBooking ? lastBooking.tokenNumber + 1 : 1;
 
+    // find patient profile by patient UHID
+    let patientProfile = await Patient.findOne({ patientUHID: patientUHID });
+    console.log("patientProfile", patientProfile);
+    
+    if (!patientProfile || patientProfile.length === 0) {
+      return responseHelper(res, 401, "Patient profile not found");
+    }
+
+    // find doctor profile by id 
+    let doctorProfile = await Doctor.findOne({ _id: doctorId });
+    console.log("doctorProfile", doctorProfile);
+    if (!doctorProfile || doctorProfile.length === 0) {
+      return responseHelper(res, 401, "Doctor profile not found");
+    }
+
     // Create new booking with sanitized inputs
     const newBooking = new OPDBooking({
       patientUHID,
-      patientName,
-      phone,
-      age,
-      gender,
-      address,
-      doctorSpeciality,
+      patientProfile: patientProfile._id,
+      doctorProfile:doctorProfile._id,
       fee: sanitizeFee,
       discount: sanitizeDiscount,
       paymentMode,
       remark,
       tokenNumber: newToken,
+      feeAfterDiscount:discountFee,
       date: todayDate,
     });
 
@@ -61,10 +67,7 @@ exports.saveOPDBooking = async (req, res) => {
     }
 
     // Send success response with discountFee included
-    return responseHelper(res, 200, "OPD booking saved successfully", {
-      ...savedBooking._doc,
-      discountFee: discountFee,
-    });
+    return responseHelper(res, 200, "OPD booking saved successfully", {savedBooking});
   } catch (error) {
     console.error("Error saving OPD booking:", error);
     return responseHelper(
@@ -81,7 +84,10 @@ exports.getTodayOpdBooking = async (req, res) => {
     const todayDate = new Date().toISOString().split("T")[0];
 
     // Find all OPD bookings for today
-    const opdBookings = await OPDBooking.find({ date: todayDate });
+    const opdBookings = await OPDBooking.find({ date: todayDate })
+      .populate("patientProfile","-password")
+      .populate("doctorProfile","-password")
+      .exec();
 
     // Check if bookings were found
     if (!opdBookings || opdBookings.length === 0) {
@@ -99,7 +105,10 @@ exports.getTodayOpdBooking = async (req, res) => {
 exports.getOPDDetailsById = async (req, res) => {
   const { opdBookingId } = req.params;
   try {
-    const opdDetails = await OPDBooking.findById({ _id: opdId })
+    const opdDetails = await OPDBooking.findById({ _id: opdBookingId })
+      .populate("patientProfile", "fullName contactNumber gender age address")
+      .populate("doctorProfile", "fullName speciality about  ")
+      .exec();
     if (!opdDetails) return responseHelper(res, 404, "No OPD bookings found for this Id");
     return responseHelper(res, 200, "OPD booking details", opdDetails);
   } catch (error) {
@@ -108,15 +117,22 @@ exports.getOPDDetailsById = async (req, res) => {
   }
 }
 
-exports.patientVisitedByDoctor = async (req, res) => {
+exports.setOpdPatientVisitedByDoctor = async (req, res) => {
   const { opdBookingId } = req.params;
   
   try {
+    const opdDetails = await OPDBooking.findById({ _id: opdBookingId });
+    if (!opdDetails) return responseHelper(res, 404, "No OPD bookings");
+    if(opdDetails.visited) return responseHelper(res, 404, "Patient Already Visited");
+
     const patientStatus = await OPDBooking.findByIdAndUpdate(
       { _id: opdBookingId },
-      { $set: {visited:true} },
+      { $set: { visited: true } },
       { new: true }
-    );
+    )
+      .populate("patientProfile", "fullName contactNumber gender age address")
+      .populate("doctorProfile", "fullName speciality about  ")
+      .exec();;
     if (!patientStatus)
       return responseHelper(res, 404, "No OPD bookings found for this Id");
     return responseHelper(res, 200, "OPD booking details", patientStatus);
