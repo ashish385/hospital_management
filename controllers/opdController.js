@@ -132,7 +132,7 @@ exports.setOpdPatientVisitedByDoctor = async (req, res) => {
     )
       .populate("patientProfile", "fullName contactNumber gender age address")
       .populate("doctorProfile", "fullName speciality about  ")
-      .exec();;
+      .exec();
     if (!patientStatus)
       return responseHelper(res, 404, "No OPD bookings found for this Id");
     return responseHelper(res, 200, "OPD booking details", patientStatus);
@@ -184,7 +184,10 @@ exports.extendUnvisitedBookingsToNextDay = async (req,res) => {
       await booking.save();
     }
 
-    const nextDayBooking = await OPDBooking.find({ date: nextDayDate });
+    const nextDayBooking = await OPDBooking.find({ date: nextDayDate })
+      .populate("patientProfile", "fullName contactNumber gender age address")
+      .populate("doctorProfile", "fullName speciality about  ")
+      .exec();;
     if (!nextDayBooking || nextDayBooking.length === 0) {
       return responseHelper(
         res,
@@ -205,4 +208,41 @@ exports.extendUnvisitedBookingsToNextDay = async (req,res) => {
     responseHelper(res, 500, "Error extending unvisited bookings:",error.message);
   }
 };
+
+
+exports.updateBookingIfDoctorIsMissing = async (req, res) => {
+  const bookingId = req.params.bookingId;
+  const { doctorId } = req.body;
+  
+   if (!doctorId) {
+     return responseHelper(res, 400, "Doctor ID is required");
+   }
+
+  try {
+    let booking = await OPDBooking.findById(bookingId)
+      .populate("patientProfile", "fullName contactNumber gender age address")
+      .populate("doctorProfile", "fullName speciality about");
+    // console.log("booking",booking);
+    
+    if (!booking) {
+      return responseHelper(res, 404, "No booking found for the given ID");
+    }
+    
+    booking.doctorProfile = doctorId;
+    await booking.save();
+    await booking.populate("doctorProfile", "fullName speciality about")
+
+    return responseHelper(res, 200, "Booking updated successfully", booking);
+  } catch (error) {
+    console.error("Error updating booking", error);
+    responseHelper(
+      res,
+      500,
+      "Error updating booking",
+      error.message
+    );
+  }
+
+};
+
 
