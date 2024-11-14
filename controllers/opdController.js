@@ -1,7 +1,8 @@
 const OPDBooking = require("../models/opdBooking");
 const { Patient } = require("../models/patient");
 const Doctor = require("../models/doctor")
-const { responseHelper, parseToFloat, returnErrorMessage } = require("../utils/validateFields");
+const { responseHelper, parseToFloat } = require("../utils/validateFields");
+const Billing = require("../models/billing");
 
 exports.saveOPDBooking = async (req, res) => {
   try {
@@ -243,6 +244,66 @@ exports.updateBookingIfDoctorIsMissing = async (req, res) => {
     );
   }
 
+};
+
+// Function to create billing for an OPD booking
+exports.createServiceBilling = async (req, res) => {
+  const { opdId } = req.params;
+
+  try {
+    // Find the OPD booking by ID
+    const booking = await OPDBooking.findById(opdId)
+      .populate("patientProfile", "fullName contactNumber gender age address")
+      .populate("doctorProfile", "fullName speciality consultationFee")
+      .exec();
+    // console.log("booking",booking);
+
+    if (!booking) {
+      return responseHelper(res, 404, "No booking found for the given OPD ID");
+    }
+
+    // Calculate the final billing amount after discount
+    const fee = booking.fee || booking.doctorProfile.consultationFee || 0;
+    const discount = booking.discount || 0;
+    const discountAmount = (fee * discount) / 100;
+    const finalAmount = fee - discountAmount;
+
+    // Create a new billing entry
+    const billingEntry = new Billing({
+      opdId: booking._id,
+      patientId: booking.patientProfile._id,
+      doctorId: booking.doctorProfile._id,
+      fee,
+      discount,
+      discountAmount,
+      finalAmount,
+      paymentStatus: "Pending", // Set default status; can be updated on payment completion
+      date: new Date(),
+    });
+
+    // Save the billing entry
+    const savedBillingEntry = await billingEntry.save();
+    console.log("savedBillingEntry", savedBillingEntry);
+
+    // Populate patient and doctor info for the response
+    await savedBillingEntry.populate([
+      {
+        path: "patientId",
+        select: "fullName contactNumber gender age address",
+      },
+      { path: "doctorId", select: "fullName speciality" },
+    ]);
+    // Return the created billing entry
+    return responseHelper(
+      res,
+      200,
+      "Billing created successfully",
+      savedBillingEntry
+    );
+  } catch (error) {
+    console.error("Error creating billing:", error);
+    return responseHelper(res, 500, "Error creating billing", error.message);
+  }
 };
 
 

@@ -4,11 +4,6 @@ const mongoose = require("mongoose");
 const opdBookingSchema = new mongoose.Schema(
   {
     patientUHID: { type: String, required: true },
-    // patientName: { type: String, required: true },
-    // phone: { type: String, required: true },
-    // age: { type: Number, required: true },
-    // gender: { type: String, required: true },
-    // address: { type: String, required: true },
     patientProfile: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "patient",
@@ -38,4 +33,5 @@ const opdBookingSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("OPDBooking", opdBookingSchema);
+const OPDBooking = mongoose.model("OPDBooking", opdBookingSchema);
+module.exports = OPDBooking;
