@@ -307,3 +307,77 @@ exports.createServiceBilling = async (req, res) => {
 };
 
 
+exports.getServiceBillingsByOpdId = async (req, res) => {
+  try {
+    const { opdId } = req.params; 
+
+    // Find all billing entries associated with the given opdId
+    const billingEntries = await Billing.find({ opdId })
+      .populate("patientId", "fullName contactNumber gender age address")
+      .populate("doctorId", "fullName speciality")
+      .exec();
+
+    if (!billingEntries || billingEntries.length === 0) {
+      return responseHelper(
+        res,
+        404,
+        "No billing entries found for the specified OPD ID"
+      );
+    }
+
+    return responseHelper(
+      res,
+      200,
+      "Billing entries retrieved successfully",
+      billingEntries
+    );
+  } catch (error) {
+    console.error("Error fetching billing entries:", error);
+    return responseHelper(
+      res,
+      500,
+      "Error fetching billing entries",
+      error.message
+    );
+  }
+};
+
+
+exports.payServiceBill = async (req, res) => {
+  try {
+    const { billingId } = req.params; // Get the billing ID from the URL
+    const { paymentMethod, amountPaid, paymentDate } = req.body; // Get payment details from the body
+
+    // Find the billing entry by billingId
+    const billingEntry = await Billing.findById(billingId);
+
+    if (!billingEntry) {
+      return responseHelper(res, 404, "Billing entry not found");
+    }
+
+    // Update billing status to 'paid' and record payment details
+    billingEntry.status = "paid"; // Or "Completed", depending on your requirements
+    billingEntry.paymentMethod = paymentMethod;
+    billingEntry.amountPaid = amountPaid;
+    billingEntry.paymentDate = paymentDate || new Date(); // Use current date if no date is provided
+
+    // Save the updated billing entry
+    const updatedBillingEntry = await billingEntry.save();
+
+    // Optionally, you can update the patient's account balance or doctor's earnings here
+
+    // Return the updated billing entry with payment info
+    return responseHelper(
+      res,
+      200,
+      "Service bill paid successfully",
+      updatedBillingEntry
+    );
+  } catch (error) {
+    console.error("Error processing payment:", error);
+    return responseHelper(res, 500, "Error processing payment", error.message);
+  }
+};
+
+
+
